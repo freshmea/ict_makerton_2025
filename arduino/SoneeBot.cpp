@@ -8,13 +8,20 @@ SoneeBot::SoneeBot(int s1Pin, int s2Pin, int neoPin, int neoCount,
     servo2Pin = s2Pin;
     neoPixelPin = neoPin;
     neoPixelCount = neoCount;
+
+    // 네오픽셀 개수를 4개로 설정
+    if (neoPixelCount != 4)
+    {
+        neoPixelCount = 4;
+    }
+
     touch1Pin = t1Pin;
     touch2Pin = t2Pin;
     touch3Pin = t3Pin;
     buzzerPin = buzPin;
 
-    servo1Angle = 90;
-    servo2Angle = 90;
+    servo1Angle = 30;  // left - 30도로 변경 (0도 하늘 방향)
+    servo2Angle = 150; // right - 150도로 변경 (180도 하늘 방향)
     lcdBacklight = true;
 
     // 터치 센서 상태 초기화
@@ -49,6 +56,11 @@ SoneeBot::SoneeBot(int s1Pin, int s2Pin, int neoPin, int neoCount,
 
     // 미션 카운터 초기화
     missionCount = 0;
+
+    // 미션 완료 관련 변수 초기화
+    missionCompleted = false;
+    missionCompleteTime = 0;
+    lastMissionCount = 0;
 
     // LCD 상태 최적화 변수 초기화
     lastServo1Angle = -1;
@@ -302,9 +314,107 @@ void SoneeBot::updateStatusDisplay()
     }
 }
 
-// 3번 터치센서 부저 카운트를 기반으로 미션 메시지 표시 (최적화)
+// 미션 카운트에 따른 네오픽셀 업데이트 함수
+void SoneeBot::updateMissionPixels(int missionCount)
+{
+    // 모든 픽셀을 먼저 끔
+    clearPixels();
+
+    if (missionCount <= 0)
+    {
+        // 미션이 0 이하면 모든 LED 꺼짐
+        return;
+    }
+
+    // 미션 단계별 색상 설정
+    for (int i = 0; i < min(missionCount, 12); i++)
+    {                           // 최대 12개까지 (4×3단계)
+        int pixelIndex = i % 4; // 0~3 순환
+
+        if (i < 4)
+        {
+            // 1~4: 초록색
+            strip->setPixelColor(pixelIndex, strip->Color(0, 255, 0));
+        }
+        else if (i < 8)
+        {
+            // 5~8: 파란색
+            strip->setPixelColor(pixelIndex, strip->Color(0, 0, 255));
+        }
+        else
+        {
+            // 9~12: 빨간색
+            strip->setPixelColor(pixelIndex, strip->Color(255, 0, 0));
+        }
+    }
+
+    strip->show();
+}
+
+// 미션 완료 효과 함수
+void SoneeBot::missionCompleteEffect()
+{
+    unsigned long currentTime = millis();
+    unsigned long elapsed = currentTime - missionCompleteTime;
+
+    if (elapsed < 3000) // 3초 동안 효과 실행
+    {
+        // 무지개 네오픽셀 효과
+        int hue = (elapsed / 10) % 360; // 10ms마다 색상 변경
+        for (int i = 0; i < neoPixelCount; i++)
+        {
+            // 각 LED마다 다른 색상으로 무지개 효과
+            int pixelHue = (hue + i * 90) % 360;                      // 90도씩 차이
+            strip->setPixelColor(i, strip->ColorHSV(pixelHue * 182)); // 0-65535 범위로 변환
+        }
+        strip->show();
+
+        // 서보 모터 동작 (3초 동안 2번 위아래 움직임)
+        int cycle = elapsed / 750; // 750ms마다 한 사이클 (총 4사이클)
+        int cycleTime = elapsed % 750;
+
+        if (cycle < 4) // 총 4사이클 (2번 위아래)
+        {
+            int angle1, angle2;
+            if (cycleTime < 375) // 전반부: 위로
+            {
+                float progress = (float)cycleTime / 375.0;
+                angle1 = 30 + (int)(60 * sin(progress * PI / 2));  // 30도에서 90도로
+                angle2 = 150 - (int)(60 * sin(progress * PI / 2)); // 150도에서 90도로
+            }
+            else // 후반부: 아래로
+            {
+                float progress = (float)(cycleTime - 375) / 375.0;
+                angle1 = 90 - (int)(60 * sin(progress * PI / 2)); // 90도에서 30도로
+                angle2 = 90 + (int)(60 * sin(progress * PI / 2)); // 90도에서 150도로
+            }
+
+            servo1.write(angle1);
+            servo2.write(angle2);
+        }
+    }
+    else
+    {
+        // 효과 완료 - 원래 상태로 복귀
+        missionCompleted = false;
+        servo1.write(30);
+        servo2.write(150);
+        servo1Angle = 30;
+        servo2Angle = 150;
+        clearPixels();
+    }
+}
+
+// LCD 및 네오픽셀 메시지 업데이트 (최적화)
 void SoneeBot::updateMessage()
 {
+    // 미션 완료 효과 실행 중이면 효과만 처리
+    if (missionCompleted)
+    {
+        missionCompleteEffect();
+        return;
+    }
+
     // 최종 미션 카운터 계산 (2번으로 증가 - 1번으로 감소)
     int finalMissionCount = touch2LastBeepCount - touch1LastBeepCount;
     if (finalMissionCount < 0)
@@ -332,6 +442,52 @@ void SoneeBot::updateMessage()
         displayCount = finalMissionCount;
     }
 
+    // 디버깅을 위한 시리얼 출력
+    Serial.print("Debug - lastMissionCount: ");
+    Serial.print(lastMissionCount);
+    Serial.print(", displayCount: ");
+    Serial.print(displayCount);
+    Serial.print(", touch1State: ");
+    Serial.print(touch1State);
+    Serial.print(", touch2State: ");
+    Serial.println(touch2State);
+
+    // 미션 완료 조건 체크: 이전 카운트가 1 이상이었는데 현재 0이 된 경우
+
+    if (!missionCompleted && lastMissionCount >= 1 && displayCount == 0)
+    {
+        missionCompleted = true;
+        missionCompleteTime = millis();
+
+        lcdClear();
+        lcdPrint(0, 0, "MISSION");
+        lcdPrint(0, 1, "COMPLETED!");
+
+        // 완료 사운드
+        digitalWrite(buzzerPin, HIGH);
+        delay(200);
+        digitalWrite(buzzerPin, LOW);
+        delay(100);
+        digitalWrite(buzzerPin, HIGH);
+        delay(200);
+        digitalWrite(buzzerPin, LOW);
+        delay(100);
+        digitalWrite(buzzerPin, HIGH);
+        delay(200);
+        digitalWrite(buzzerPin, LOW);
+
+        Serial.println("=== MISSION COMPLETED ===");
+        Serial.println("Starting celebration effect for 3 seconds");
+        Serial.print("Trigger condition - lastMissionCount: ");
+        Serial.print(lastMissionCount);
+        Serial.print(" -> displayCount: ");
+        Serial.println(displayCount);
+
+        // lastMissionCount를 즉시 업데이트하여 중복 실행 방지
+        lastMissionCount = displayCount;
+        return; // 미션 완료 효과로 넘어감
+    }
+
     // 변경사항 확인
     bool needUpdate = false;
 
@@ -342,7 +498,7 @@ void SoneeBot::updateMessage()
         needUpdate = true;
     }
 
-    // 변경사항이 있을 때만 LCD 업데이트
+    // 변경사항이 있을 때만 LCD 및 네오픽셀 업데이트
     if (needUpdate)
     {
         lcdClear();
@@ -369,11 +525,20 @@ void SoneeBot::updateMessage()
             lcdPrint(4, 1, " (Done)");
         }
 
+        // 네오픽셀 업데이트 (미션 카운트에 따라)
+        updateMissionPixels(displayCount);
+
         // 이전 상태 업데이트
         lastTouch3BeepCountDisplay = displayCount;
         lastTouch3StateDisplay = touch2State;
         lastTouch1Display = touch1State;
+
+        // 시리얼로 네오픽셀 상태 디버깅
+        Serial.println("Mission Count: " + String(displayCount) + " - NeoPixel updated");
     }
+
+    // lastMissionCount 업데이트는 마지막에 수행 (미션 완료가 실행되지 않은 경우에만)
+    lastMissionCount = displayCount;
 }
 
 // 센서 읽기 함수들
@@ -421,11 +586,16 @@ void SoneeBot::updateTouchStates()
         int expectedBeepCount = (touch1Duration / 500) + 1;
         if (expectedBeepCount > touch1BeepCount)
         {
+            // 미션 감소 시 서보 모션 추가
+            moveBothServos(90, 90);  // 먼저 90도로 이동
+            delay(300);              // 잠시 대기
+            moveBothServos(30, 150); // 원래 위치로 복귀
+
             digitalWrite(buzzerPin, HIGH);
             delay(50); // 1번 터치는 짧은 소리 (감소용)
             digitalWrite(buzzerPin, LOW);
             touch1BeepCount++;
-            Serial.println("Touch 1 (DECREASE) Beep #" + String(touch1BeepCount) + " at " + String(touch1Duration) + "ms");
+            Serial.println("Touch 1 (DECREASE) Beep #" + String(touch1BeepCount) + " at " + String(touch1Duration) + "ms - Servo motion executed");
         }
     }
     else
@@ -474,7 +644,7 @@ void SoneeBot::updateTouchStates()
         touch2BeepCount = 0;
     }
 
-    // Touch 3 처리 (기존과 동일)
+    // Touch 3 처리 - 랜덤 서보 선택 기능으로 변경
     if (touch3State)
     {
         if (!lastTouch3State)
@@ -487,11 +657,35 @@ void SoneeBot::updateTouchStates()
         int expectedBeepCount = (touch3Duration / 500) + 1;
         if (expectedBeepCount > touch3BeepCount)
         {
+            // 랜덤으로 서보1 또는 서보2 선택 (1 또는 2)
+            int selectedServo = random(1, 3); // 1 또는 2 반환
+            int originalAngle1 = servo1Angle;
+            int originalAngle2 = servo2Angle;
+
+            if (selectedServo == 1)
+            {
+                // 서보1 선택: 90도로 내려갔다가 원래 위치로 복귀
+                Serial.println("Touch 3 - Servo1 selected for random motion");
+                moveServo1(90);
+                delay(500);                 // 90도에서 0.5초 대기
+                moveServo1(originalAngle1); // 원래 위치로 복귀
+                Serial.println("Touch 3 - Servo1 motion completed");
+            }
+            else
+            {
+                // 서보2 선택: 90도로 내려갔다가 원래 위치로 복귀
+                Serial.println("Touch 3 - Servo2 selected for random motion");
+                moveServo2(90);
+                delay(500);                 // 90도에서 0.5초 대기
+                moveServo2(originalAngle2); // 원래 위치로 복귀
+                Serial.println("Touch 3 - Servo2 motion completed");
+            }
+
             digitalWrite(buzzerPin, HIGH);
             delay(100);
             digitalWrite(buzzerPin, LOW);
             touch3BeepCount++;
-            Serial.println("Touch 3 Beep #" + String(touch3BeepCount) + " at " + String(touch3Duration) + "ms");
+            Serial.println("Touch 3 Beep #" + String(touch3BeepCount) + " at " + String(touch3Duration) + "ms - Random servo" + String(selectedServo) + " motion executed");
         }
     }
     else
@@ -499,6 +693,7 @@ void SoneeBot::updateTouchStates()
         if (lastTouch3State)
         {
             touch3LastBeepCount = touch3BeepCount;
+            Serial.println("Touch 3 RELEASED - Total beeps: " + String(touch3LastBeepCount));
         }
         touch3Duration = 0;
         touch3StartTime = 0;

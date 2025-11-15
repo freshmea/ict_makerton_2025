@@ -67,6 +67,11 @@ private:
     // 미션 카운터 추가
     int missionCount;
 
+    // 미션 완료 관련 변수 추가
+    bool missionCompleted;
+    unsigned long missionCompleteTime;
+    int lastMissionCount;
+
     // LCD 상태 최적화를 위한 이전 값 저장
     int lastServo1Angle;
     int lastServo2Angle;
@@ -101,6 +106,8 @@ public:
     void fillColor(uint8_t r, uint8_t g, uint8_t b);
     void clearPixels();
     void rainbowEffect();
+    void updateMissionPixels(int missionCount); // 미션 카운트에 따른 네오픽셀 업데이트 추가
+    void missionCompleteEffect();               // 미션 완료 효과 추가
 
     // LCD 제어
     void lcdPrint(int col, int row, String text);
