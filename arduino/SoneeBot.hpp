@@ -72,6 +72,10 @@ private:
     unsigned long missionCompleteTime;
     int lastMissionCount;
 
+    // Good Job 메시지 관련 변수 추가
+    bool showingGoodJob;
+    unsigned long goodJobStartTime;
+
     // LCD 상태 최적화를 위한 이전 값 저장
     int lastServo1Angle;
     int lastServo2Angle;

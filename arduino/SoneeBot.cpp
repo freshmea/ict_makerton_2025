@@ -62,6 +62,10 @@ SoneeBot::SoneeBot(int s1Pin, int s2Pin, int neoPin, int neoCount,
     missionCompleteTime = 0;
     lastMissionCount = 0;
 
+    // Good Job 메시지 관련 변수 초기화
+    showingGoodJob = false;
+    goodJobStartTime = 0;
+
     // LCD 상태 최적화 변수 초기화
     lastServo1Angle = -1;
     lastServo2Angle = -1;
@@ -415,6 +419,24 @@ void SoneeBot::updateMessage()
         return;
     }
 
+    // Good Job 메시지 표시 중인지 확인
+    if (showingGoodJob)
+    {
+        unsigned long elapsed = millis() - goodJobStartTime;
+        if (elapsed < 1000) // 1초 동안 표시
+        {
+            // Good Job 메시지 유지
+            return;
+        }
+        else
+        {
+            // 1초 경과, Good Job 메시지 종료
+            showingGoodJob = false;
+            // 강제로 LCD 업데이트를 위해 이전 상태 초기화
+            lastTouch3BeepCountDisplay = -999;
+        }
+    }
+
     // 최종 미션 카운터 계산 (2번으로 증가 - 1번으로 감소)
     int finalMissionCount = touch2LastBeepCount - touch1LastBeepCount;
     if (finalMissionCount < 0)
@@ -453,7 +475,6 @@ void SoneeBot::updateMessage()
     Serial.println(touch2State);
 
     // 미션 완료 조건 체크: 이전 카운트가 1 이상이었는데 현재 0이 된 경우
-
     if (!missionCompleted && lastMissionCount >= 1 && displayCount == 0)
     {
         missionCompleted = true;
@@ -580,6 +601,13 @@ void SoneeBot::updateTouchStates()
         {
             touch1StartTime = currentTime;
             touch1BeepCount = 0;
+            
+            // 1번 터치 시작 시 Good Job 메시지 표시
+            showingGoodJob = true;
+            goodJobStartTime = currentTime;
+            lcdClear();
+            lcdPrint(0, 0, "Good Job !!");
+            Serial.println("Touch 1 PRESSED - Good Job message displayed");
         }
         touch1Duration = currentTime - touch1StartTime;
 
