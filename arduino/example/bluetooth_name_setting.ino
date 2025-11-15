@@ -1,6 +1,6 @@
 #include <SoftwareSerial.h>
 
-SoftwareSerial BTSerial(7, 8);
+SoftwareSerial BTSerial(5, 6);
 
 void setup()
 {

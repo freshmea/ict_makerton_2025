@@ -1,32 +1,71 @@
-// 기초 프로그램
+#include "SoneeBot.hpp"
+
+// SoneeBot 객체 생성 (기본 핀 설정 사용)
+SoneeBot robot;
+
 void setup()
 {
-    // 시리얼 통신 시작
-    Serial.begin(9600);
+    // SoneeBot 초기화 - 모든 장치 초기화 포함
+    robot.init();
 
-    // 내장 LED 핀을 출력으로 설정 (연결 확인용)
-    pinMode(LED_BUILTIN, OUTPUT);
-
-    // 시리얼 통신이 준비될 때까지 대기
-    while (!Serial)
-    {
-        ; // 시리얼 포트 연결 대기
-    }
-
-    // 시작 메시지
-    Serial.println("Arduino is ready!");
+    // 초기화 완료 후 테스트 실행
+    // robot.testAllDevices();
 }
 
 void loop()
 {
-    // "Hello, ICT Makerton 2025!" 메시지를 시리얼 모니터에 출력
-    Serial.println("Hello, ICT Makerton 2025!");
+    // 터치 상태 업데이트 (매 루프마다 호출 필요)
+    robot.updateTouchStates();
 
-    // 내장 LED 깜빡임 (보드 작동 확인용)
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(500);
-    digitalWrite(LED_BUILTIN, LOW);
+    // // 터치 시작 감지
+    // if (robot.isTouchPressed(1))
+    // {
+    //     robot.moveServoSmooth(1, 180);
+    //     robot.fillColor(255, 0, 0);
+    //     robot.beep(200);
+    // }
 
-    // 0.5초 대기
-    delay(500);
+    // if (robot.isTouchPressed(2))
+    // {
+    //     robot.moveServoSmooth(2, 0);
+    //     robot.fillColor(0, 255, 0);
+    //     robot.beep(200);
+    // }
+
+    // if (robot.isTouchPressed(3))
+    // {
+    //     robot.moveBothServos(90, 90);
+    //     robot.clearPixels();
+    //     robot.beepPattern(2, 100, 100);
+    // }
+
+    // // 롱프레스 감지 (2초 이상)
+    // if (robot.isTouchLongPress(1, 2000))
+    // {
+    //     robot.lcdPrint(0, 0, "Long Press 1!");
+    //     robot.fillColor(255, 255, 0);
+    // }
+
+    // if (robot.isTouchLongPress(2, 2000))
+    // {
+    //     robot.lcdPrint(0, 0, "Long Press 2!");
+    //     robot.fillColor(255, 0, 255);
+    // }
+
+    // if (robot.isTouchLongPress(3, 2000))
+    // {
+    //     robot.lcdPrint(0, 0, "Long Press 3!");
+    //     robot.fillColor(0, 255, 255);
+    // }
+
+    // // 터치 해제 감지
+    // if (robot.isTouchReleased(1) || robot.isTouchReleased(2) || robot.isTouchReleased(3))
+    // {
+    //     robot.clearPixels();
+    // }
+
+    // 상태 업데이트 (터치 시간 포함)
+    // robot.updateStatusDisplay();
+
+    robot.updateMessage();
 }

@@ -11,6 +11,7 @@
 
 // ===== 객체 생성 =====
 SoftwareSerial BT(BT_RX_PIN, BT_TX_PIN);
+
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // ===== 디버깅용 타이밍 변수 =====

@@ -61,7 +61,7 @@ void setup()
     lcd.begin();     // init() 대신 begin() 사용
     lcd.backlight(); // 백라이트 ON
 
-    lcd.setCursor(0, 0);
+    00.setCursor(0, 0);
     lcd.print("Smart DI System");
     lcd.setCursor(0, 1);
     lcd.print("Init...Please");
