@@ -601,7 +601,7 @@ void SoneeBot::updateTouchStates()
         {
             touch1StartTime = currentTime;
             touch1BeepCount = 0;
-            
+
             // 1번 터치 시작 시 Good Job 메시지 표시
             showingGoodJob = true;
             goodJobStartTime = currentTime;
