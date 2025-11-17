@@ -10,10 +10,9 @@ private:
     bool currentState;
     bool lastState;
     unsigned long startTime;
-    unsigned long duration;
+
     int beepCount;
     int lastBeepCount;
-    bool beepTriggered;
 
 public:
     TouchSensor(int sensorPin);

@@ -14,7 +14,7 @@ void setup()
 
 void loop()
 {
-
+    robot.update();
     // 터치 상태 업데이트 (매 루프마다 호출 필요)
     robot.updateTouchStates();
 

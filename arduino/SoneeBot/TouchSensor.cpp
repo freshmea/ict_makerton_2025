@@ -6,10 +6,8 @@ TouchSensor::TouchSensor(int sensorPin)
     currentState = false;
     lastState = false;
     startTime = 0;
-    duration = 0;
     beepCount = 0;
     lastBeepCount = 0;
-    beepTriggered = false;
 }
 
 void TouchSensor::init()
@@ -31,8 +29,8 @@ void TouchSensor::update()
             startTime = currentTime;
             beepCount = 0;
         }
-        duration = currentTime - startTime;
 
+        unsigned long duration = currentTime - startTime;
         int expectedBeepCount = (duration / 500) + 1;
         if (expectedBeepCount > beepCount)
         {
@@ -45,7 +43,6 @@ void TouchSensor::update()
         {
             lastBeepCount += beepCount;
         }
-        duration = 0;
         startTime = 0;
         beepCount = 0;
     }
@@ -68,12 +65,16 @@ bool TouchSensor::isHeld()
 
 bool TouchSensor::isLongPress(unsigned long threshold)
 {
-    return isHeld() && duration >= threshold;
+    return isHeld() && getDuration() >= threshold;
 }
 
 unsigned long TouchSensor::getDuration()
 {
-    return duration;
+    if (currentState && startTime > 0)
+    {
+        return millis() - startTime;
+    }
+    return 0;
 }
 
 int TouchSensor::getBeepCount()

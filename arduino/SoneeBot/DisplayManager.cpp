@@ -3,24 +3,25 @@
 DisplayManager::DisplayManager(int neoPin, int neoCount)
 {
     neoPixelPin = neoPin;
-    neoPixelCount = (neoCount != 4) ? 4 : neoCount;
+    neoPixelCount = 4; // 고정값으로 단순화
     lcdBacklight = true;
 
-    // 상태 변수 초기화
-    lastServo1Angle = -1;
-    lastServo2Angle = -1;
+    // 상태 변수 최소한만 초기화
+    lastMissionCountDisplay = -1;
     lastTouch1Display = false;
     lastTouch2Display = false;
-    lastTouch3Display = false;
-    lastTouch1DurationDisplay = 0;
-    lastTouch2DurationDisplay = 0;
-    lastTouch3DurationDisplay = 0;
-    lastMissionCountDisplay = -1;
-    lastTouch3StateDisplay = false;
 
-    // 객체 생성
-    strip = new Adafruit_NeoPixel(neoPixelCount, neoPixelPin, NEO_GRB + NEO_KHZ800);
+    Serial.print("DisplayManager created (static allocation), Free RAM: ");
+    Serial.println(getFreeMemory());
+
+    // 네오픽셀을 더 작은 설정으로 - 정적 할당으로 안전하게 생성
+    strip = new Adafruit_NeoPixel(4, neoPixelPin, NEO_GRB + NEO_KHZ800);
+
+    // LCD 객체 생성
     lcd = new LiquidCrystal_I2C(0x27, 16, 2);
+
+    Serial.print("DisplayManager initialization completed, Free RAM: ");
+    Serial.println(getFreeMemory());
 }
 
 DisplayManager::~DisplayManager()
@@ -159,16 +160,10 @@ void DisplayManager::showMissionCompleteMessage()
 
 void DisplayManager::updateMissionDisplay(int missionCount, bool touch1State, bool touch2State, int touch1BeepCount, int touch2BeepCount)
 {
-    bool needUpdate = false;
-
+    // 단순화된 업데이트 로직
     if (missionCount != lastMissionCountDisplay ||
         touch1State != lastTouch1Display ||
         touch2State != lastTouch2Display)
-    {
-        needUpdate = true;
-    }
-
-    if (needUpdate)
     {
         lcdClear();
         lcdPrint(0, 0, "Today Mission!!");
@@ -184,10 +179,6 @@ void DisplayManager::updateMissionDisplay(int missionCount, bool touch1State, bo
         {
             lcdPrint(4, 1, " (-ing...)");
         }
-        else if (touch2BeepCount > 0 || touch1BeepCount > 0)
-        {
-            lcdPrint(4, 1, " (Done)");
-        }
 
         updateMissionPixels(missionCount);
 
@@ -197,63 +188,24 @@ void DisplayManager::updateMissionDisplay(int missionCount, bool touch1State, bo
     }
 }
 
+// updateStatusDisplay 함수를 단순화하거나 제거
 void DisplayManager::updateStatusDisplay(int servo1Angle, int servo2Angle, bool touch1State, bool touch2State, bool touch3State, unsigned long touch1Duration, unsigned long touch2Duration, unsigned long touch3Duration)
 {
-    bool needUpdate = false;
+    // 메모리 절약을 위해 단순화된 버전
+    lcdClear();
+    lcdPrint(0, 0, "S1:" + String(servo1Angle) + " S2:" + String(servo2Angle));
 
-    if (servo1Angle != lastServo1Angle || servo2Angle != lastServo2Angle)
-    {
-        needUpdate = true;
-    }
+    String touchInfo = "T:";
+    touchInfo += touch1State ? "0" : "1";
+    touchInfo += touch2State ? "0" : "1";
+    touchInfo += touch3State ? "0" : "1";
+    lcdPrint(0, 1, touchInfo);
+}
 
-    if (touch1State != lastTouch1Display ||
-        touch2State != lastTouch2Display ||
-        touch3State != lastTouch3Display)
-    {
-        needUpdate = true;
-    }
-
-    unsigned long currentTouch1Sec = touch1Duration / 1000;
-    unsigned long currentTouch2Sec = touch2Duration / 1000;
-    unsigned long currentTouch3Sec = touch3Duration / 1000;
-
-    if (currentTouch1Sec != lastTouch1DurationDisplay ||
-        currentTouch2Sec != lastTouch2DurationDisplay ||
-        currentTouch3Sec != lastTouch3DurationDisplay)
-    {
-        needUpdate = true;
-    }
-
-    if (needUpdate)
-    {
-        lcdClear();
-        lcdPrint(0, 0, "S1:" + String(servo1Angle) + " S2:" + String(servo2Angle));
-
-        String touchInfo = "T:";
-        touchInfo += touch1State ? "0" : "1";
-        touchInfo += touch2State ? "0" : "1";
-        touchInfo += touch3State ? "0" : "1";
-
-        if (touch1State || touch2State || touch3State)
-        {
-            touchInfo += " ";
-            if (touch1State)
-                touchInfo += String(currentTouch1Sec) + "s ";
-            if (touch2State)
-                touchInfo += String(currentTouch2Sec) + "s ";
-            if (touch3State)
-                touchInfo += String(currentTouch3Sec) + "s";
-        }
-
-        lcdPrint(0, 1, touchInfo);
-
-        lastServo1Angle = servo1Angle;
-        lastServo2Angle = servo2Angle;
-        lastTouch1Display = touch1State;
-        lastTouch2Display = touch2State;
-        lastTouch3Display = touch3State;
-        lastTouch1DurationDisplay = currentTouch1Sec;
-        lastTouch2DurationDisplay = currentTouch2Sec;
-        lastTouch3DurationDisplay = currentTouch3Sec;
-    }
+// 메모리 체크 함수 추가
+int DisplayManager::getFreeMemory()
+{
+    extern int __heap_start, *__brkval;
+    int v;
+    return (int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval);
 }

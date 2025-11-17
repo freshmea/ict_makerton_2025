@@ -14,17 +14,13 @@ private:
     int neoPixelCount;
     bool lcdBacklight;
 
-    // LCD 상태 최적화 변수들
-    int lastServo1Angle;
-    int lastServo2Angle;
+    // LCD 상태 최적화 변수들 - 메모리 절약을 위해 일부 제거
+    int lastMissionCountDisplay;
     bool lastTouch1Display;
     bool lastTouch2Display;
-    bool lastTouch3Display;
-    unsigned long lastTouch1DurationDisplay;
-    unsigned long lastTouch2DurationDisplay;
-    unsigned long lastTouch3DurationDisplay;
-    int lastMissionCountDisplay;
-    bool lastTouch3StateDisplay;
+
+    // 메모리 체크 함수
+    int getFreeMemory();
 
 public:
     DisplayManager(int neoPin, int neoCount);
