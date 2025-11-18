@@ -201,9 +201,11 @@ void SoneeBot::testAllDevices()
     displayManager->lcdPrint(0, 1, "Devices...");
 
     // 서보 테스트
-    servoController->moveBothServos(0, 180);
+    servoController->moveServo1(0);
+    servoController->moveServo2(180);
     delay(500);
-    servoController->moveBothServos(180, 0);
+    servoController->moveServo1(180);
+    servoController->moveServo2(0);
     delay(500);
     servoController->resetToDefault();
 

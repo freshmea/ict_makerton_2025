@@ -13,6 +13,11 @@ private:
     unsigned long animationDuration;
     int animationType;
 
+    // Random motion용 변수들 추가
+    int randomServoNum;
+    int originalAngle1;
+    int originalAngle2;
+
 public:
     ServoAsync(ServoController *controller);
     void update();

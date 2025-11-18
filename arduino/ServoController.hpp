@@ -19,8 +19,6 @@ public:
     void init();
     void moveServo1(int angle);
     void moveServo2(int angle);
-    void moveBothServos(int angle1, int angle2);
-    void moveServoSmooth(int servoNum, int angle, int delayMs = 15);
     int getServo1Angle();
     int getServo2Angle();
     void resetToDefault();

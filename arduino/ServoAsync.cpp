@@ -39,7 +39,8 @@ void ServoAsync::update()
                     angle2 = 90 + (int)(60 * sin(progress * PI / 2));
                 }
 
-                servoController->moveBothServos(angle1, angle2);
+                servoController->moveServo1(angle1);
+                servoController->moveServo2(angle2);
             }
         }
         else
@@ -50,13 +51,37 @@ void ServoAsync::update()
     }
     else if (animationType == 2) // Random motion
     {
-        // Random motion is handled instantly, no update needed
-        isAnimating = false;
+        if (elapsed < animationDuration)
+        {
+            // 첫 500ms: 90도로 이동 후 유지
+            // 500ms 이후: 원래 각도로 복귀
+            if (elapsed >= 500)
+            {
+                // 원래 각도로 복귀
+                if (randomServoNum == 1)
+                {
+                    servoController->moveServo1(originalAngle1);
+                }
+                else
+                {
+                    servoController->moveServo2(originalAngle2);
+                }
+                isAnimating = false;
+            }
+        }
     }
     else if (animationType == 3) // Mission decrease motion
     {
-        // Mission decrease motion is handled instantly, no update needed
-        isAnimating = false;
+        if (elapsed < animationDuration)
+        {
+            if (elapsed >= 300)
+            {
+                // 300ms 후: 원래 위치로 복귀
+                servoController->moveServo1(30);
+                servoController->moveServo2(150);
+                isAnimating = false;
+            }
+        }
     }
 }
 
@@ -70,31 +95,41 @@ void ServoAsync::startMissionCompleteAnimation()
 
 void ServoAsync::startRandomMotion(int servoNum)
 {
-    int originalAngle1 = servoController->getServo1Angle();
-    int originalAngle2 = servoController->getServo2Angle();
+    if (isAnimating)
+        return; // 이미 애니메이션 중이면 무시
 
+    originalAngle1 = servoController->getServo1Angle();
+    originalAngle2 = servoController->getServo2Angle();
+    randomServoNum = servoNum;
+
+    // 즉시 90도로 이동
     if (servoNum == 1)
     {
         servoController->moveServo1(90);
-        delay(500);
-        servoController->moveServo1(originalAngle1);
     }
     else
     {
         servoController->moveServo2(90);
-        delay(500);
-        servoController->moveServo2(originalAngle2);
     }
 
+    isAnimating = true;
+    animationStartTime = millis();
+    animationDuration = 500; // 500ms 후 원래 위치로 복귀
     animationType = 2;
 }
 
 void ServoAsync::startMissionDecraseMotion()
 {
-    servoController->moveBothServos(90, 90);
-    delay(300);
-    servoController->moveBothServos(30, 150);
+    if (isAnimating)
+        return; // 이미 애니메이션 중이면 무시
 
+    // 즉시 90도로 이동
+    servoController->moveServo1(90);
+    servoController->moveServo2(90);
+
+    isAnimating = true;
+    animationStartTime = millis();
+    animationDuration = 300; // 300ms 후 원래 위치로 복귀
     animationType = 3;
 }
 
