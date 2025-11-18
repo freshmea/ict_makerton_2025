@@ -14,12 +14,6 @@ void setup()
 
 void loop()
 {
-
-    // 터치 상태 업데이트 (매 루프마다 호출 필요)
-    robot.updateTouchStates();
-
-    // 상태 업데이트 (터치 시간 포함)
-    // robot.updateStatusDisplay();
-
-    robot.updateMessage();
+    // robot update
+    robot.update(millis());
 }
