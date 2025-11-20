@@ -42,7 +42,7 @@ void DisplayManager::init()
     strip->show();
 
     // LCD 초기화
-    lcd->begin();
+    lcd->init();
     lcd->backlight();
 
     // 초기화 메시지
@@ -236,6 +236,7 @@ void DisplayManager::updateMissionDisplay(int missionCount, bool touch1State, bo
 {
     if (missionCount != lastMissionCountDisplay || touch1State != lastTouch1Display || touch2State != lastTouch2Display)
     {
+        updateMissionPixels(missionCount);
         lcdClear();
         lcdPrint(0, 0, "Today Mission!!");
 
@@ -254,8 +255,6 @@ void DisplayManager::updateMissionDisplay(int missionCount, bool touch1State, bo
         {
             lcdPrint(4, 1, " (Done)");
         }
-
-        updateMissionPixels(missionCount);
 
         lastMissionCountDisplay = missionCount;
         lastTouch1Display = touch1State;

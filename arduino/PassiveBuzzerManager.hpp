@@ -66,6 +66,7 @@ public:
     void playGreensleeves();
     void playAuLaitClair();
     void playBrahmsLullaby();
+    void playRandom();
 };
 
 #endif

@@ -41,7 +41,6 @@ public:
     void lcdClear();
     void lcdBacklightOn();
     void lcdBacklightOff();
-    void showGoodJobMessage();
     void updateStatusDisplay(int servo1Angle, int servo2Angle, bool touch1, bool touch2, bool touch3,
                              unsigned long touch1Duration, unsigned long touch2Duration, unsigned long touch3Duration);
 
@@ -51,7 +50,7 @@ public:
     void clearPixels();
     void rainbowEffect();
     void updateMissionPixels(int missionCount);
-    void missionCompleteEffect();
+    void missionCompleteEffect(unsigned long currentMillis);
 
     // 미션 관련 디스플레이
     void updateMissionDisplay(int missionCount, bool touch1State, bool touch2State);

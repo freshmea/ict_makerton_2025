@@ -14,6 +14,5 @@ void setup()
 
 void loop()
 {
-    // robot update
     robot.update(millis());
 }

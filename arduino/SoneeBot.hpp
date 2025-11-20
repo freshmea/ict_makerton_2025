@@ -1,9 +1,9 @@
 #ifndef SONEEBOT_HPP
 #define SONEEBOT_HPP
 
-#include "BuzzerManager.hpp"
 #include "DisplayManager.hpp"
 #include "MissionManager.hpp"
+#include "PassiveBuzzerManager.hpp"
 #include "ServoAsync.hpp"
 #include "ServoController.hpp"
 #include "TouchSensor.hpp"
@@ -20,7 +20,8 @@ private:
     ServoAsync *servoAsync;
     DisplayManager *displayManager;
     MissionManager *missionManager;
-    BuzzerManager *buzzerManager;
+    PassiveBuzzerManager *buzzerManager;
+    int missionCount;
 
 public:
     SoneeBot(int s1Pin = 10, int s2Pin = 11, int neoPin = 3, int neoCount = 4,
@@ -44,7 +45,7 @@ public:
     ServoController *getServoController() { return servoController; }
     DisplayManager *getDisplayManager() { return displayManager; }
     MissionManager *getMissionManager() { return missionManager; }
-    BuzzerManager *getBuzzerManager() { return buzzerManager; }
+    PassiveBuzzerManager *getBuzzerManager() { return buzzerManager; }
 };
 
 #endif

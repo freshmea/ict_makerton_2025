@@ -17,6 +17,7 @@ void PassiveBuzzerManager::init()
 {
     pinMode(buzzerPin, OUTPUT);
     noTone(buzzerPin);
+    playStartup();
 }
 
 void PassiveBuzzerManager::update(unsigned long currentMillis)
@@ -100,6 +101,7 @@ void PassiveBuzzerManager::addNote(int frequency, int duration)
 
 void PassiveBuzzerManager::addMelody(MelodyNote *melody, int noteCount)
 {
+    stop(); // 현재 재생 중지
     for (int i = 0; i < noteCount && !isQueueFull(); i++)
     {
         melodyQueue[queueEnd].frequency = melody[i].frequency;
@@ -528,4 +530,21 @@ void PassiveBuzzerManager::playBrahmsLullaby()
         {294, 1500} // D
     };
     addMelody(brahmsLullabyMelody, sizeof(brahmsLullabyMelody) / sizeof(MelodyNote));
+}
+
+void PassiveBuzzerManager::playRandom()
+{
+    // 랜덤 멜로디 재생 (0~8 사이의 랜덤 숫자)
+    int randomMelody = random(0, 9);
+
+    switch (randomMelody)
+    {
+
+    case 1:
+        playBrahmsLullaby();
+        break;
+    default:
+        playBeep(1000, 200); // 기본 비프음
+        break;
+    }
 }

@@ -11,7 +11,8 @@ SoneeBot::SoneeBot(int s1Pin, int s2Pin, int neoPin, int neoCount,
     servoAsync = new ServoAsync(servoController);
     displayManager = new DisplayManager(neoPin, neoCount);
     missionManager = new MissionManager();
-    buzzerManager = new BuzzerManager(buzPin);
+    // buzzerManager = new BuzzerManager(buzPin);
+    buzzerManager = new PassiveBuzzerManager(buzPin);
 }
 
 SoneeBot::~SoneeBot()
@@ -42,7 +43,10 @@ void SoneeBot::init()
     pinMode(LED_BUILTIN, OUTPUT);
 
     // 초기화 완료 효과
-    buzzerManager->beepPattern(2, 100, 100);
+    // buzzerManager->beepPattern(2, 100, 100);
+    buzzerManager->addNote(1000, 100);
+    buzzerManager->addNote(0, 50);
+    buzzerManager->addNote(1000, 100);
 
     delay(2000);
 
@@ -102,11 +106,16 @@ void SoneeBot::updateTouchStates()
         {
             servoAsync->startMissionDecraseMotion(_currentMillis);
             // 비동기 beep (짧은 소리)
-            buzzerManager->beepPattern(2, 100, 100);
+            buzzerManager->playSuccess();
             Serial.println("Touch 1 (DECREASE) Beep #" + String(expectedBeepCount) + " - Servo motion executed");
 
             // TouchSensor의 beepCount를 증가시킴
             touch1->incrementBeepCount();
+            missionCount--;
+            if (missionCount < 0)
+            {
+                missionCount = 0; // 미션 카운트가 음수가 되지 않도록 방지
+            }
         }
     }
 
@@ -125,9 +134,12 @@ void SoneeBot::updateTouchStates()
         if (expectedBeepCount > currentBeepCount)
         {
             // 비동기 beep (긴 소리)
-            buzzerManager->beepPattern(2, 200, 100);
+            buzzerManager->addNote(1200, 200);
+            buzzerManager->addNote(0, 50);
+            buzzerManager->addNote(1200, 200);
             Serial.println("Touch 2 (INCREASE) Beep #" + String(expectedBeepCount));
             touch2->incrementBeepCount();
+            missionCount++;
         }
     }
 
@@ -148,7 +160,7 @@ void SoneeBot::updateTouchStates()
             int selectedServo = random(1, 3);
             servoAsync->startRandomMotion(selectedServo, _currentMillis);
             // 비동기 beep (중간 소리)
-            buzzerManager->beepPattern(2, 150, 100);
+            buzzerManager->playRandom();
             Serial.println("Touch 3 Beep #" + String(expectedBeepCount) + " - Random servo" + String(selectedServo) + " motion executed");
             touch3->incrementBeepCount();
         }
@@ -182,19 +194,16 @@ void SoneeBot::updateMessage()
         servoAsync->startMissionCompleteAnimation(_currentMillis);
 
         // 비동기 완료 사운드
-        buzzerManager->beepPattern(3, 200, 100);
+        buzzerManager->playHappyBirthday();
 
         Serial.println("=== MISSION COMPLETED ===");
+        missionCount = 0;
         missionManager->resetMissionCompleted();
         return;
     }
 
-    // 현재 표시할 미션 카운트 계산
-    int displayCount = missionManager->getDisplayCount(touch2->getBeepCount(), touch1->getBeepCount(),
-                                                       touch1->isHeld(), touch2->isHeld());
-
     // 미션 디스플레이 업데이트
-    displayManager->updateMissionDisplay(displayCount, touch1->isHeld(), touch2->isHeld());
+    displayManager->updateMissionDisplay(missionCount, touch1->isHeld(), touch2->isHeld());
 }
 
 void SoneeBot::testAllDevices()
@@ -222,7 +231,12 @@ void SoneeBot::testAllDevices()
     displayManager->clearPixels();
 
     // 비동기 부저 테스트
-    buzzerManager->beepPattern(3, 100, 100);
+    // buzzerManager->beepPattern(3, 100, 100);
+    buzzerManager->addNote(1000, 100);
+    buzzerManager->addNote(0, 50);
+    buzzerManager->addNote(1000, 100);
+    buzzerManager->addNote(0, 50);
+    buzzerManager->addNote(1000, 100);
     Serial.println("All tests completed!");
 }
 
