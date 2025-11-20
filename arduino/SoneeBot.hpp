@@ -31,6 +31,7 @@ public:
     void updateTouchStates();
     void updateMessage();
     void update(unsigned long currentMillis);
+    unsigned long _currentMillis;
 
     // 테스트 함수들
     void testAllDevices();

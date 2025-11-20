@@ -53,6 +53,7 @@ void SoneeBot::init()
 
 void SoneeBot::update(unsigned long currentMillis)
 {
+    _currentMillis = currentMillis;
     // 모든 터치 센서 업데이트
     touch1->update();
     touch2->update();
@@ -154,7 +155,8 @@ void SoneeBot::updateTouchStates()
 
     if (touch3->isReleased())
     {
-        Serial.println("Touch 3 RELEASED - Total beeps: " + String(touch3->getBeepCount()));
+        touch3->addToLastBeepCount();
+        Serial.println("Touch 3 RELEASED - Total beeps: " + String(touch3->getLastBeepCount()));
     }
 }
 
