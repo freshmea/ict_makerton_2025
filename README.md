@@ -10,6 +10,11 @@
 
 - 손으로 만드는 즐거움, 소니소니손!
 
+- dependency :
+  - LCD I2C 라이브러리 ( [링크](https://github.com/johnrickman/LiquidCrystal_I2C.git) )
+  - Servo 라이브러리 ( 기본 내장 [링크](https://docs.arduino.cc/libraries/servo/))
+  - Adafruit NeoPixel 라이브러리 ( [링크](https://github.com/adafruit/Adafruit_NeoPixel.git) )
+
 ## 주제
 
 1. 알록달록 말하는 애착 곰인형
@@ -44,3 +49,9 @@
   - 패시브 부저 매니저 추가
 - millis() 함수의 중복 호출 제거
   - update 함수에 현재 시간을 인자로 넘겨주는 방식으로 변경
+- 미션 매니저 수정
+  - 미션 매니저가 미션 완료 여부만 관리하도록 수정
+  - 미션 카운트의 이전 값을 외부에서 관리하도록 변경
+- PassiveBuzzerManager 클래스 디버깅
+  - play 함수들 추가
+  - 각 상황에 맞게 play 함수 적용
