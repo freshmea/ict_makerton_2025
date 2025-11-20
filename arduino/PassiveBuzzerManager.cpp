@@ -539,8 +539,31 @@ void PassiveBuzzerManager::playRandom()
 
     switch (randomMelody)
     {
-
+    case 0:
+        playSuccess();
+        break;
     case 1:
+        playHappyBirthday();
+        break;
+    case 2:
+        playTwinkleTwinkleLittleStar();
+        break;
+    case 3:
+        playMaryHadALittleLamb();
+        break;
+    case 4:
+        playFurElise();
+        break;
+    case 5:
+        playOdeToJoy();
+        break;
+    case 6:
+        playCannonInD();
+        break;
+    case 7:
+        playAmazingGrace();
+        break;
+    case 8:
         playBrahmsLullaby();
         break;
     default:

@@ -36,7 +36,6 @@ public:
 
     // 테스트 함수들
     void testAllDevices();
-    void printPinInfo();
 
     // 접근자 함수들
     TouchSensor *getTouch1() { return touch1; }
