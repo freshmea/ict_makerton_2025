@@ -101,6 +101,7 @@ void SoneeBot::updateTouchStates()
             {
                 missionCount = 0;
             }
+            displayManager->updateMissionPixels(missionCount);
         }
     }
 
