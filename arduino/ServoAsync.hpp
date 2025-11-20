@@ -20,10 +20,10 @@ private:
 
 public:
     ServoAsync(ServoController *controller);
-    void update();
-    void startMissionCompleteAnimation();
-    void startRandomMotion(int servoNum);
-    void startMissionDecraseMotion();
+    void update(unsigned long currentMillis);
+    void startMissionCompleteAnimation(unsigned long currentMillis);
+    void startRandomMotion(int servoNum, unsigned long currentMillis);
+    void startMissionDecraseMotion(unsigned long currentMillis);
     bool isAnimationRunning();
 };
 

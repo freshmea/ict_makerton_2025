@@ -9,12 +9,12 @@ ServoAsync::ServoAsync(ServoController *controller)
     animationType = 0;
 }
 
-void ServoAsync::update()
+void ServoAsync::update(unsigned long currentMillis)
 {
     if (!isAnimating)
         return;
 
-    unsigned long elapsed = millis() - animationStartTime;
+    unsigned long elapsed = currentMillis - animationStartTime;
 
     if (animationType == 1) // Mission complete animation
     {
@@ -85,15 +85,15 @@ void ServoAsync::update()
     }
 }
 
-void ServoAsync::startMissionCompleteAnimation()
+void ServoAsync::startMissionCompleteAnimation(unsigned long currentMillis)
 {
     isAnimating = true;
-    animationStartTime = millis();
+    animationStartTime = currentMillis;
     animationDuration = 3000;
     animationType = 1;
 }
 
-void ServoAsync::startRandomMotion(int servoNum)
+void ServoAsync::startRandomMotion(int servoNum, unsigned long currentMillis)
 {
     if (isAnimating)
         return; // 이미 애니메이션 중이면 무시
@@ -113,12 +113,12 @@ void ServoAsync::startRandomMotion(int servoNum)
     }
 
     isAnimating = true;
-    animationStartTime = millis();
+    animationStartTime = currentMillis;
     animationDuration = 500; // 500ms 후 원래 위치로 복귀
     animationType = 2;
 }
 
-void ServoAsync::startMissionDecraseMotion()
+void ServoAsync::startMissionDecraseMotion(unsigned long currentMillis)
 {
     if (isAnimating)
         return; // 이미 애니메이션 중이면 무시
@@ -128,7 +128,7 @@ void ServoAsync::startMissionDecraseMotion()
     servoController->moveServo2(90);
 
     isAnimating = true;
-    animationStartTime = millis();
+    animationStartTime = currentMillis;
     animationDuration = 300; // 300ms 후 원래 위치로 복귀
     animationType = 3;
 }

@@ -77,10 +77,10 @@ void DisplayManager::lcdBacklightOff()
     lcdBacklight = false;
 }
 
-void DisplayManager::showGoodJobMessage()
+void DisplayManager::showGoodJobMessage(unsigned long currentMillis)
 {
     showingGoodJob = true;
-    goodJobStartTime = millis();
+    goodJobStartTime = currentMillis;
     lcdClear();
     lcdPrint(0, 0, "Good Job !!");
 }
@@ -211,9 +211,9 @@ void DisplayManager::updateMissionPixels(int missionCount)
     strip->show();
 }
 
-void DisplayManager::missionCompleteEffect()
+void DisplayManager::missionCompleteEffect(unsigned long currentMillis)
 {
-    unsigned long elapsed = millis() - missionCompleteTime;
+    unsigned long elapsed = currentMillis - missionCompleteTime;
 
     if (elapsed < 3000)
     {
@@ -263,21 +263,21 @@ void DisplayManager::updateMissionDisplay(int missionCount, bool touch1State, bo
     }
 }
 
-void DisplayManager::startMissionCompleteEffect()
+void DisplayManager::startMissionCompleteEffect(unsigned long currentMillis)
 {
     missionCompleted = true;
-    missionCompleteTime = millis();
+    missionCompleteTime = currentMillis;
 
     lcdClear();
     lcdPrint(0, 0, "MISSION");
     lcdPrint(0, 1, "COMPLETED!");
 }
 
-void DisplayManager::update()
+void DisplayManager::update(unsigned long currentMillis)
 {
     if (showingGoodJob)
     {
-        unsigned long elapsed = millis() - goodJobStartTime;
+        unsigned long elapsed = currentMillis - goodJobStartTime;
         if (elapsed >= 1000)
         {
             showingGoodJob = false;
@@ -286,7 +286,7 @@ void DisplayManager::update()
 
     if (missionCompleted)
     {
-        missionCompleteEffect();
+        missionCompleteEffect(currentMillis);
     }
 }
 

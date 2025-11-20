@@ -17,7 +17,7 @@ void TouchSensor::init()
     pinMode(pin, INPUT);
 }
 
-void TouchSensor::update()
+void TouchSensor::update(unsigned long currentMillis)
 {
     lastState = currentState;
     currentState = digitalRead(pin) == HIGH;
@@ -26,10 +26,10 @@ void TouchSensor::update()
     {
         if (!lastState)
         {
-            startTime = millis();
+            startTime = currentMillis;
             beepCount = 0; // 터치 시작 시 beepCount 초기화
         }
-        duration = millis() - startTime;
+        duration = currentMillis - startTime;
 
         // beepCount 자동 증가 로직 제거
         // SoneeBot에서 직접 관리하도록 변경

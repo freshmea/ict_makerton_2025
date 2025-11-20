@@ -18,7 +18,7 @@ private:
 public:
     TouchSensor(int pinNumber);
     void init();
-    void update();
+    void update(unsigned long currentMillis);
     bool isPressed();
     bool isReleased();
     bool isHeld();
@@ -28,7 +28,7 @@ public:
     int getLastBeepCount();
     void resetBeepCount();
     void addToLastBeepCount();
-    void incrementBeepCount(); // 새로운 메서드 추가
+    void incrementBeepCount();
 };
 
 #endif

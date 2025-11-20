@@ -19,17 +19,15 @@ void BuzzerManager::init()
     digitalWrite(buzzerPin, LOW);
 }
 
-void BuzzerManager::update()
+void BuzzerManager::update(unsigned long currentMillis)
 {
     if (!playing)
-        return; // isPlaying -> playing으로 변경
-
-    unsigned long currentTime = millis();
+        return;
 
     if (isPaused)
     {
         // 일시정지 상태
-        if (currentTime - pauseStartTime >= pauseDuration)
+        if (currentMillis - pauseStartTime >= pauseDuration)
         {
             isPaused = false;
             currentRepeat++;
@@ -37,13 +35,13 @@ void BuzzerManager::update()
             if (currentRepeat >= repeatCount)
             {
                 // 모든 반복 완료
-                playing = false; // isPlaying -> playing으로 변경
+                playing = false;
                 digitalWrite(buzzerPin, LOW);
             }
             else
             {
                 // 다음 beep 시작
-                startTime = currentTime;
+                startTime = currentMillis;
                 digitalWrite(buzzerPin, HIGH);
             }
         }
@@ -51,20 +49,20 @@ void BuzzerManager::update()
     else
     {
         // beep 재생 상태
-        if (currentTime - startTime >= duration)
+        if (currentMillis - startTime >= duration)
         {
             digitalWrite(buzzerPin, LOW);
 
             if (currentRepeat + 1 >= repeatCount)
             {
                 // 모든 반복 완료
-                playing = false; // isPlaying -> playing으로 변경
+                playing = false;
             }
             else
             {
                 // 일시정지 시작
                 isPaused = true;
-                pauseStartTime = currentTime;
+                pauseStartTime = currentMillis;
             }
         }
     }
@@ -80,8 +78,8 @@ void BuzzerManager::beep(int beepDuration)
     stop();
 
     // 단일 beep 설정
-    playing = true; // isPlaying -> playing으로 변경
-    startTime = millis();
+    playing = true;
+    startTime = 0; // update에서 설정됨
     duration = beepDuration;
     pauseDuration = 0;
     repeatCount = 1;
@@ -101,8 +99,8 @@ void BuzzerManager::beepPattern(int count, int beepDuration, int interval)
     stop();
 
     // 패턴 beep 설정
-    playing = true; // isPlaying -> playing으로 변경
-    startTime = millis();
+    playing = true;
+    startTime = 0; // update에서 설정됨
     duration = beepDuration;
     pauseDuration = interval;
     repeatCount = count;

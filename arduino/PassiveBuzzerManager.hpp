@@ -31,7 +31,7 @@ private:
 public:
     PassiveBuzzerManager(int pin = 2);
     void init();
-    void update();
+    void update(unsigned long currentMillis);
 
     // 단일 노트 추가
     void addNote(int frequency, int duration);
@@ -54,6 +54,18 @@ public:
     void playSuccess();
     void playError();
     void playStartup();
+
+    // 클래식 & 전통 멜로디들
+    void playHappyBirthday();
+    void playTwinkleTwinkleLittleStar();
+    void playMaryHadALittleLamb();
+    void playFurElise();
+    void playOdeToJoy();
+    void playCannonInD();
+    void playAmazingGrace();
+    void playGreensleeves();
+    void playAuLaitClair();
+    void playBrahmsLullaby();
 };
 
 #endif

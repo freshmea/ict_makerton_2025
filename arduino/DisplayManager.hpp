@@ -55,10 +55,11 @@ public:
 
     // 미션 관련 디스플레이
     void updateMissionDisplay(int missionCount, bool touch1State, bool touch2State);
-    void startMissionCompleteEffect();
-    void update();
+    void startMissionCompleteEffect(unsigned long currentMillis);
+    void update(unsigned long currentMillis);
     bool isMissionCompleteEffectRunning();
     bool isShowingGoodJob();
+    void showGoodJobMessage(unsigned long currentMillis);
 };
 
 #endif

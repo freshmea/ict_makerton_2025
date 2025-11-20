@@ -19,7 +19,7 @@ private:
 public:
     BuzzerManager(int pin = 2);
     void init();
-    void update();
+    void update(unsigned long currentMillis);
 
     // 단일 beep
     void beep(int duration = 200);

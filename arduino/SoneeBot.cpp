@@ -54,25 +54,26 @@ void SoneeBot::init()
 void SoneeBot::update(unsigned long currentMillis)
 {
     _currentMillis = currentMillis;
+
     // 모든 터치 센서 업데이트
-    touch1->update();
-    touch2->update();
-    touch3->update();
+    touch1->update(currentMillis);
+    touch2->update(currentMillis);
+    touch3->update(currentMillis);
 
     // 터치 상태 업데이트
     updateTouchStates();
 
     // 서보 애니메이션 업데이트
-    servoAsync->update();
+    servoAsync->update(currentMillis);
 
     // 부저 업데이트
-    buzzerManager->update();
+    buzzerManager->update(currentMillis);
 
     // 메시지 및 상태 업데이트
     updateMessage();
 
     // 디스플레이 업데이트
-    displayManager->update();
+    displayManager->update(currentMillis);
 
     // 미션 매니저 업데이트
     missionManager->update(touch2->getLastBeepCount(), touch1->getLastBeepCount(),
@@ -84,7 +85,7 @@ void SoneeBot::updateTouchStates()
     // Touch 1 처리 (미션 감소용)
     if (touch1->isPressed())
     {
-        displayManager->showGoodJobMessage();
+        displayManager->showGoodJobMessage(_currentMillis);
         Serial.println("Touch 1 PRESSED - Good Job message displayed");
     }
 
@@ -99,7 +100,7 @@ void SoneeBot::updateTouchStates()
 
         if (expectedBeepCount > currentBeepCount)
         {
-            servoAsync->startMissionDecraseMotion();
+            servoAsync->startMissionDecraseMotion(_currentMillis);
             // 비동기 beep (짧은 소리)
             buzzerManager->beepPattern(2, 100, 100);
             Serial.println("Touch 1 (DECREASE) Beep #" + String(expectedBeepCount) + " - Servo motion executed");
@@ -145,7 +146,7 @@ void SoneeBot::updateTouchStates()
         if (expectedBeepCount > currentBeepCount)
         {
             int selectedServo = random(1, 3);
-            servoAsync->startRandomMotion(selectedServo);
+            servoAsync->startRandomMotion(selectedServo, _currentMillis);
             // 비동기 beep (중간 소리)
             buzzerManager->beepPattern(2, 150, 100);
             Serial.println("Touch 3 Beep #" + String(expectedBeepCount) + " - Random servo" + String(selectedServo) + " motion executed");
@@ -177,8 +178,8 @@ void SoneeBot::updateMessage()
     // 미션 완료 체크
     if (missionManager->isMissionCompleted())
     {
-        displayManager->startMissionCompleteEffect();
-        servoAsync->startMissionCompleteAnimation();
+        displayManager->startMissionCompleteEffect(_currentMillis);
+        servoAsync->startMissionCompleteAnimation(_currentMillis);
 
         // 비동기 완료 사운드
         buzzerManager->beepPattern(3, 200, 100);
