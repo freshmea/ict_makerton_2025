@@ -73,8 +73,7 @@ void SoneeBot::update(unsigned long currentMillis)
     displayManager->update(currentMillis);
 
     // 미션 매니저 업데이트
-    missionManager->update(touch2->getLastBeepCount(), touch1->getLastBeepCount(),
-                           touch1->isHeld(), touch2->isHeld());
+    missionManager->update(missionCount, lastMissionCount);
 }
 
 void SoneeBot::updateTouchStates()

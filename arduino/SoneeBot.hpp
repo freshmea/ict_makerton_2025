@@ -22,6 +22,7 @@ private:
     MissionManager *missionManager;
     PassiveBuzzerManager *buzzerManager;
     int missionCount;
+    int lastMissionCount;
 
 public:
     SoneeBot(int s1Pin = 10, int s2Pin = 11, int neoPin = 3, int neoCount = 4,
